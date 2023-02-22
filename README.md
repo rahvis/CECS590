@@ -2,10 +2,16 @@
 
 Python version 
 python -V  
-Python 3.6.13 :: Anaconda, Inc.
+Python 3.6.13 :: Anaconda, Inc. <br />
+
+OS <br />
+sw_vers<br />
+ProductName:		macOS<br />
+ProductVersion:		13.2<br />
+BuildVersion:		22D49<br />
 
 Dependencies: Text-Similarity-0.13 (requires Perl to be installed on the System).
-
+Installing Perl : https://learn.perl.org/installing/osx.html
 https://metacpan.org/dist/Text-Similarity 
 
 How to run the code (Make sure Perl is installed on the System)
