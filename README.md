@@ -10,7 +10,7 @@ ProductName:		macOS<br />
 ProductVersion:		13.2<br />
 BuildVersion:		22D49<br />
 
-Dependencies: Text-Similarity-0.13 (requires Perl to be installed on the System).
+Dependencies: Text-Similarity-0.13 (requires Perl to be installed on the System). <br />
 Installing Perl : https://learn.perl.org/installing/osx.html
 https://metacpan.org/dist/Text-Similarity 
 
