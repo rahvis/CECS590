@@ -135,7 +135,7 @@ if __name__ == "__main__":
 
     lineCounter = 1
 
-    with open(r"/Users/rahulvishwakarma/Downloads/nlp.csv", "r", encoding='latin-1') as f:
+    with open(r"/Users/rahulvishwakarma/PycharmProjects/CECS590/dataset/nlp_100.csv", "r", encoding='latin-1') as f:
 
         for line in f:
 
@@ -148,7 +148,7 @@ if __name__ == "__main__":
             # if lineCounter == 20001:
 
             #       break
-            if lineCounter > 800:
+            if lineCounter > 80:
 
                 t = []
 
@@ -178,12 +178,12 @@ if __name__ == "__main__":
 
     # To test the Inductive Conformal Prediction
 
-    proper_set = commentTraining[:700]
+    proper_set = commentTraining[:70]
     #proper_set = commentTraining[:30]
 
-    calibration_set = commentTraining[700:]
+    calibration_set = commentTraining[70:]
     #calibration_set = commentTraining[30:]
-
+    #
     alphas = []
 
     n = len(calibration_set)
@@ -195,7 +195,7 @@ if __name__ == "__main__":
     for i in range(n):
         alphas.append(__non_conformity_score(Classifier, proper_set, calibration_set[i]))
 
-    for i in range(100):
+    for i in range(10):
 
         v = commentTest[i]
 
@@ -227,7 +227,7 @@ if __name__ == "__main__":
 
     print(pvalues)
 
-    with open(r"/Users/rahulvishwakarma/Downloads/final_output_100_with_pvalues.txt", "a") as f1:
+    with open(r"/Users/rahulvishwakarma/Downloads/final_output_100_with_pvalues_100.txt", "a") as f1:
 
         f1.write(str(output))
 
