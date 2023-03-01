@@ -1,127 +1,13 @@
-import math
-import csv
-import os
-
-
-############  Similarity Module  ############
-# return the distance between 2 texts
-def text_distance(string_a, string_b):
-    s = os.popen('perl  /Users/rahulvishwakarma/Downloads/Text-Similarity-0.13/bin/text_similarity.pl '
-                 '--type=Text::Similarity::Overlaps --verbose '
-                 '--stoplist=/Users/rahulvishwakarma/Downloads/Text-Similarity-0.13/samples/stoplist.txt --string "{'
-                 '}" "{}"'.format(string_a.replace("`", "").replace("-", "").replace("(", "").replace(")",
-                                                                                                      "").replace(
-        '"', ''), string_b.replace("`", "").replace("-", "").replace("(", "").replace(")", "").replace('"', ''))).read()
-
-    s = s.split('\n')
-
-    if 'keys: 0' in s:
-
-        return 1
-
-    else:
-
-        distance = 1 - float(s[0])
-
-        return distance
-
-
-############Classifier############
-'''Nearest Neighbors
-
-Z is composed of 'y' label and 'x' vector
-
-noCons: the index to doesn't compute'''
-
-
-def NN(Z, noCons):
-    minEq = float('inf')
-
-    minDis = float('inf')
-
-    for i in range(len(Z)):
-
-        if i == noCons:
-            continue
-
-        # same label
-
-        if Z[i][1] == Z[noCons][1]:
-
-            t = distanceFunction(Z[i][0], Z[noCons][0])
-
-            if t < minEq:
-                minEq = t
-
-        else:
-
-            t = distanceFunction(Z[i][0], Z[noCons][0])
-
-            if t < minDis:
-                minDis = t
-
-    if minDis == 0:
-
-        if minEq == 0:
-
-            return 0
-
-        else:
-
-            return float('inf')
-
-    return float(minEq) / minDis
-
-
-############Algorithms############
-
-
-'''Inductive Conformal Prediction
-
-A: nonConformity function
-
-B: training set
-
-alphas: non-conformity scores
-
-z: the test example'''
-
-
-def ICP(A, error, B, alphas, z):
-    az = __non_conformity_score(A, B, z)
-
-    n = len(alphas)
-
-    c = 0
-
-    for i in range(n):
-
-        if alphas[i] >= az:
-            c += 1
-
-    pValue = float(c) / n
-
-    if pValue > error:
-
-        return True, pValue
-
-    else:
-
-        return False, pValue
-
-
-def __non_conformity_score(A, B, z):
-    B.append(z)
-
-    n = len(B)
-
-    az = A(B, n - 1)
-
-    B.pop(n - 1)
-
-    return az
-
-
+from UncertaintyQuantification.Similarity import Distance
+from UncertaintyQuantification.Classifier import Classifiers
+from UncertaintyQuantification.Algorithms import Algos
+from UncertaintyQuantification.GraphPlot import Visualize
+import configparser
+#Loading config
+config = configparser.ConfigParser()
+config.read("UncertaintyQuantification/config.ini")
+OUTPUT_LOCATION = config["location"]["output_location"]
+DATASET_LOCATION=config["location"]["dataset_location"]
 ############Main############
 
 
@@ -135,7 +21,7 @@ if __name__ == "__main__":
 
     lineCounter = 1
 
-    with open(r"/Users/rahulvishwakarma/Downloads/nlp.csv", "r", encoding='latin-1') as f:
+    with open(DATASET_LOCATION, "r", encoding='latin-1') as f:
 
         for line in f:
 
@@ -148,7 +34,7 @@ if __name__ == "__main__":
             # if lineCounter == 20001:
 
             #       break
-            if lineCounter > 800:
+            if lineCounter > 80:
 
                 t = []
 
@@ -172,17 +58,17 @@ if __name__ == "__main__":
 
     # read the file
 
-    distanceFunction = text_distance
+    distanceFunction = Distance().text_distance
 
-    Classifier = NN
+    Classifier = Classifiers().NN
 
     # To test the Inductive Conformal Prediction
 
-    proper_set = commentTraining[:700]
-    #proper_set = commentTraining[:30]
+    proper_set = commentTraining[:70]
+    # proper_set = commentTraining[:30]
 
-    calibration_set = commentTraining[700:]
-    #calibration_set = commentTraining[30:]
+    calibration_set = commentTraining[70:]
+    # calibration_set = commentTraining[30:]
 
     alphas = []
 
@@ -192,20 +78,25 @@ if __name__ == "__main__":
 
     pvalues = []
 
-    for i in range(n):
-        alphas.append(__non_conformity_score(Classifier, proper_set, calibration_set[i]))
+    confidence_X=[]
+    credibility_Y=[]
 
-    for i in range(100):
+    for i in range(n):
+        alphas.append(Algos().non_conformity_score(Classifier, proper_set, calibration_set[i]))
+
+    for i in range(10):
 
         v = commentTest[i]
 
         v = v[0]
 
-        canAddOne, pOne = ICP(Classifier, 0.05, proper_set, alphas, [v, 1])
+        canAddOne, pOne = Algos().ICP(Classifier, 0.05, proper_set, alphas, [v, 1])
 
-        canAddZero, pZero = ICP(Classifier, 0.05, proper_set, alphas, [v, 0])
+        canAddZero, pZero = Algos().ICP(Classifier, 0.05, proper_set, alphas, [v, 0])
 
         pvalues.append([pOne, pZero])
+        confidence_X.append(1-max(pOne,pZero))
+        credibility_Y.append(max(pOne,pZero))
 
         if pOne > pZero:
 
@@ -213,7 +104,7 @@ if __name__ == "__main__":
 
             output.append(1)
 
-            alphas.append(__non_conformity_score(Classifier, proper_set, [v, 1]))
+            alphas.append(Algos().non_conformity_score(Classifier, proper_set, [v, 1]))
 
         else:
 
@@ -221,13 +112,14 @@ if __name__ == "__main__":
 
             output.append(0)
 
-            alphas.append(__non_conformity_score(Classifier, proper_set, [v, 0]))
+            alphas.append(Algos().non_conformity_score(Classifier, proper_set, [v, 0]))
 
     print(output)
 
     print(pvalues)
+    visualize=Visualize().plot_graph(confidence_X,credibility_Y,"Confidence","Credibility","Confidence vs Credibility")
 
-    with open(r"/Users/rahulvishwakarma/Downloads/final_output_100_with_pvalues.txt", "a") as f1:
+    with open(OUTPUT_LOCATION, "a") as f1:
 
         f1.write(str(output))
 
