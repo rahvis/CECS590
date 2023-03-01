@@ -21,5 +21,7 @@ conda activate CECS590 <br />
 git clone https://github.com/rahvis/CECS590.git <br />
 cd CECS590 <br />
 
+To successfully run the code- make necessary changes in config.ini file
+
 
 
