@@ -12,7 +12,11 @@ BuildVersion:		22D49<br />
 
 Dependencies: Text-Similarity-0.13 (requires Perl to be installed on the System). <br />
 Installing Perl : https://learn.perl.org/installing/osx.html  <br />
-https://metacpan.org/dist/Text-Similarity 
+https://metacpan.org/dist/Text-Similarity  <br />
+
+Dataset: https://www.kaggle.com/datasets/tboyle10/medicaltranscriptions <br />
+
+
 
 How to run the code (Make sure Perl is installed on the System)
 
